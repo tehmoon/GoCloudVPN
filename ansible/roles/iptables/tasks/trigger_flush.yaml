@@ -1,0 +1,15 @@
+---
+- name: "Trigger IPTables Restore"
+  assert:
+    that: True
+  changed_when: True
+  notify: "Restore IPTables"
+  when: (( not role_iptables_triggered is defined ) or
+         ( not role_iptables_triggered | bool ))
+  tags:
+    - always
+
+- set_fact: role_iptables_triggered=True
+  tags:
+    - always
+  when: ( not role_iptables_triggered is defined )

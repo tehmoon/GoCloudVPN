@@ -1,0 +1,9 @@
+---
+# Fix failed when
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password create --name {{ name }} --{{ type }} --duration '3600 * 24 * 7'"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  failed_when: False
+  tags:
+    - role::easy_ca

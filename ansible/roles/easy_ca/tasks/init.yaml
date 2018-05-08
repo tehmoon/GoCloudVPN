@@ -1,0 +1,18 @@
+---
+# fix failed_when
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password init"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  failed_when: False
+  tags:
+    - role::easy_ca
+
+# fix failed_when
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password create-ca --name GoCloudVPN"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  failed_when: False
+  tags:
+    - role::easy_ca

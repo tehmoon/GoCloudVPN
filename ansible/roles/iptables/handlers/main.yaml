@@ -1,0 +1,6 @@
+---
+- name: "Restore IPTables"
+  include_tasks: "{{ iptables_role_path }}/tasks/flush_iptables.yaml"
+  become: true
+  when: (( not role_iptables_flushed is defined ) or
+         ( not role_iptables_flushed | bool ))

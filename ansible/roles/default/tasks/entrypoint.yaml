@@ -1,0 +1,2 @@
+---
+- include_tasks: "../../iptables/tasks/trigger_flush.yaml"

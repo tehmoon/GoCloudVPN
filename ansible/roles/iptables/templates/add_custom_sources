@@ -1,0 +1,3 @@
+{% for source in item.sources %}
+  -A {{ item.chain | default('INPUT') }} -s {{ source }} {% if item.interface is defined %}-i {{ item.interface }} {% endif %} {% if item.protocol is defined %}-p {{ item.protocol }} {% endif %} {% if item.sport is defined %}--sport {{ item.sport }} {% endif %}{% if item.dport is defined %}--dport {{ item.dport }} {% endif %} {% if item.state is defined %}-m state --state {{ item.state }} {% endif %} -j {{ item.jump | default('ACCEPT') }}
+{% endfor %}

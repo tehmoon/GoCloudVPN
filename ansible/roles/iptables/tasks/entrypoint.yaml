@@ -1,0 +1,171 @@
+---
+- fail: >
+    msg="Role: iptables is not yet available on distribution: {{ ansible_distribution }}"
+  when: ( ansible_distribution != 'Ubuntu' )
+
+- name: "Clean directory"
+  file:
+    dest: "{{ iptables_dir }}"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0750
+    state: absent
+  become: true
+  when: ( not role_iptables_executed )
+
+- name: "Create Directory"
+  file:
+    dest: "{{ iptables_dir }}"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0750
+    state: directory
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy NAT Rules"
+  copy:
+    dest: "{{ iptables_dir }}/nat-000-start"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      *nat
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy Chain Policies"
+  copy:
+    dest: "{{ iptables_dir }}/nat-001-policies"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      :INPUT ACCEPT [0:0]
+      :PREROUTING ACCEPT [0:0]
+      :POSTROUTING ACCEPT [0:0]
+      :OUTPUT ACCEPT [0:0]
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy add custom nat sources rules"
+  template:
+    src: "add_custom_sources"
+    dest: "{{ iptables_dir }}/nat-002-rules-{{ 100000 | random | to_uuid }}"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+  become: true
+  with_items: "{{ add_custom_nat_sources | default([]) }}"
+
+- name: "COMMIT NAT"
+  copy:
+    dest: "{{ iptables_dir }}/nat-999-end"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      COMMIT
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy Filter Rules"
+  copy:
+    dest: "{{ iptables_dir }}/filter-000-start"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      *filter
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy Chain Policies"
+  copy:
+    dest: "{{ iptables_dir }}/filter-001-policies"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      :INPUT ACCEPT [0:0]
+      :FORWARD ACCEPT [0:0]
+      :OUTPUT ACCEPT [0:0]
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy SSH custom"
+  template:
+    src: "add_custom_sources"
+    dest: "{{ iptables_dir }}/filter-002-rules-{{ 100000 | random | to_uuid }}"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+  with_items: [{
+    chain: "INPUT",
+    protocol: "tcp",
+    dport: "22",
+    state: "NEW,ESTABLISHED",
+    jump: "ACCEPT",
+    sources: ["0.0.0.0/0"]
+  }]
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Deploy add custom sources rules"
+  template:
+    src: "add_custom_sources"
+    dest: "{{ iptables_dir }}/filter-002-rules-{{ 100000 | random | to_uuid }}"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+  become: true
+  with_items: "{{ add_custom_sources | default([]) }}"
+
+- name: "Enable Log"
+  copy:
+    dest: "{{ iptables_dir }}/filter-980-log"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      -A INPUT -m limit --limit 2/min -j LOG --log-prefix "IPTables-Dropped: "
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "DROP"
+  copy:
+    dest: "{{ iptables_dir }}/filter-990-drop"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      -A INPUT -j DROP
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "COMMIT filters"
+  copy:
+    dest: "{{ iptables_dir }}/filter-999-end"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    mode: 0440
+    content: |
+      COMMIT
+  become: true
+  when: ( not role_iptables_executed | bool )
+
+- name: "Assemble"
+  assemble:
+    src: "{{ iptables_dir }}"
+    dest: "{{ iptables_rules_file }}"
+    owner: "{{ root_user_name }}"
+    group: "{{ root_group_name }}"
+    validate: "iptables-restore -t %s"
+    mode: 0440
+  register: assemble
+  changed_when: ( not assemble is failed )
+  become: true
+
+- include_tasks: "../../iptables/tasks/trigger_flush.yaml"
+
+- set_fact: role_iptables_executed=True

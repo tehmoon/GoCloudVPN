@@ -1,0 +1,34 @@
+---
+- fail: >
+    msg="Role: openvpn is not yet available on distribution: {{ ansible_distribution }}"
+  when: ( ansible_distribution != 'Ubuntu' )
+
+- name: "Install packages"
+  apt:
+    package: "{{ item }}"
+  become: true
+  with_items:
+    - "openvpn"
+  when: ( ansible_distribution == 'Ubuntu' ) and
+        ( not role_openvpn_executed | bool )
+
+- template:
+    src: "{{ item.src }}"
+    dest: "/etc/openvpn/{{ item.src }}"
+    owner: "{{ item.owner }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: "server.conf", mode: "0600", owner: "{{ root_user_name }}" }
+    - { src: "auth-oath-wrapper.sh", mode: "0500", owner: "nobody" }
+    - { src: "auth-oathd-wrapper.sh", mode: "0500", owner: "{{ root_user_name }}" }
+  when: ( not role_openvpn_executed | bool )
+
+- template:
+    src: "users.json"
+    dest: "/etc/openvpn/users.json"
+    owner: "{{ root_user_name }}"
+    mode: "0600"
+  failed_when: False
+  when: ( not role_openvpn_executed | bool )
+
+- set_fact: role_openvpn_executed=True

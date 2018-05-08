@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export SCALEWAY_ORG_TOKEN="{{ SCALEWAY_ORG_TOKEN}}"
+export SCALEWAY_TOKEN="{{ SCALEWAY_TOKEN }}"
+
+bin/scaleway-dynamic-inventory --list

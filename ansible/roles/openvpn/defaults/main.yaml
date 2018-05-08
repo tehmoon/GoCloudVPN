@@ -1,0 +1,3 @@
+---
+role_openvpn_executed: false
+openvpn_role_path: "{{ inventory_dir }}/../../roles/openvpn"

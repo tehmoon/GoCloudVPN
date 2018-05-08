@@ -1,0 +1,9 @@
+[submodule "vendors/cryptocli"]
+	path = vendors/cryptocli
+	url = https://github.com/tehmoon/cryptocli
+[submodule "vendors/scaleway-dynamic-inventory"]
+	path = vendors/scaleway-dynamic-inventory
+	url = https://github.com/elsyms/scaleway-dynamic-inventory
+[submodule "vendors/easy-ca"]
+	path = vendors/easy-ca
+	url = https://github.com/tehmoon/easy-ca

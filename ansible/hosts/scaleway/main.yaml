@@ -1,0 +1,11 @@
+localhost ansible_connection="local" ansible_host="127.0.0.1"
+
+[scaleway]
+[scaleway:vars]
+ansible_ssh_common_args="-F {{ inventory_dir }}/.ssh/config"
+
+[scaleway:children]
+vpn
+
+[vpn]
+[vpn:vars]

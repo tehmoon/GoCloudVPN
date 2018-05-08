@@ -1,0 +1,4 @@
+---
+role_auth_oath_executed: false
+auth_oath_role_path: "{{ inventory_dir }}/../../roles/auth_oath"
+auth_oath_download_url: "https://github.com/tehmoon/auth-oath/releases/download/v0.1/auth-oath-linux-amd64.zip"

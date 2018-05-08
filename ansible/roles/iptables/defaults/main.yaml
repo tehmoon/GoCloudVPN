@@ -1,0 +1,5 @@
+---
+role_iptables_executed: false
+iptables_dir: "/etc/iptables"
+iptables_role_path: "{{ inventory_dir }}/../../roles/iptables"
+iptables_rules_file: "/etc/iptables.rules"

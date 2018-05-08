@@ -1,0 +1,78 @@
+---
+- hosts: vpn
+  vars_prompt:
+    - name: "EASY_CA_PASSWD"
+      prompt: "Easy-ca PKI password"
+      private: yes
+  pre_tasks:
+    - apt:
+        update_cache: yes
+        cache_valid_time: 3600
+  roles:
+    - default
+    - { role: iptables,
+        add_custom_sources: [{
+          chain: "INPUT",
+          state: "ESTABLISHED",
+          jump: "ACCEPT",
+          sources: ["0.0.0.0/0"]
+        }]
+      }
+    - openvpn
+
+  tasks:
+    - include_tasks: "../roles/easy_ca/tasks/init.yaml"
+      tags:
+        - role::easy_ca
+
+    - include_tasks: "../roles/easy_ca/tasks/create.yaml"
+      vars:
+        name: "{{ inventory_hostname }}"
+        type: "server"
+      tags:
+        - role::easy_ca
+
+    - include_tasks: "../roles/easy_ca/tasks/crl.yaml"
+      vars:
+        name: "{{ inventory_hostname }}"
+        duration: "3600 * 24 * 7"
+      tags:
+        - role::easy_ca
+
+    - include_tasks: "../roles/easy_ca/tasks/export.yaml"
+      vars:
+        name: "{{ inventory_hostname }}"
+      tags:
+        - role::easy_ca
+
+    - copy:
+        dest: "/etc/openvpn/ca.crt"
+        owner: "{{ root_user_name }}"
+        mode: 0400
+        content: "{{ easy_ca_ca_cert }}"
+      tags:
+        - role::easy_ca
+
+    - copy:
+        dest: "/etc/openvpn/crl.pem"
+        owner: "{{ root_user_name }}"
+        mode: 0444
+        content: "{{ easy_ca_crl }}"
+      tags:
+        - role::easy_ca
+
+    - copy:
+        dest: "/etc/openvpn/server.crt"
+        owner: "{{ root_user_name }}"
+        mode: 0400
+        content: "{{ easy_ca_cert }}"
+      tags:
+        - role::easy_ca
+
+    - copy:
+        dest: "/etc/openvpn/server.key"
+        owner: "{{ root_user_name }}"
+        mode: 0400
+        content: "{{ easy_ca_key }}"
+      tags:
+        - role::easy_ca

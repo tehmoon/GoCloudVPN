@@ -1,0 +1,22 @@
+---
+- fail: >
+    msg="Role: auth_oath is not yet available on distribution: {{ ansible_distribution }}"
+  when: ( ansible_distribution != 'Ubuntu' )
+
+- name: "Install packages"
+  apt:
+    package: "{{ item }}"
+  with_items:
+    - "zip"
+    - "unzip"
+    - "oathtool"
+  when: ( ansible_distribution == 'Ubuntu' ) and
+        ( not role_auth_oath_executed | bool )
+
+- unarchive:
+    src: "{{ auth_oath_download_url }}"
+    remote_src: yes
+    dest: "/usr/local/bin"
+  when: ( not role_auth_oath_executed | bool )
+
+- set_fact: role_auth_oath_executed=True

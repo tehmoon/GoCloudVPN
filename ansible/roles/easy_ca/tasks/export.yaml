@@ -1,0 +1,40 @@
+---
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password export --name ca"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  register: ca_cert
+  tags:
+    - role::easy_ca
+
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password export --name {{ name }}"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  register: cert
+  tags:
+    - role::easy_ca
+
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password export --priv --name {{ name }}"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  register: key 
+  tags:
+    - role::easy_ca
+
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password crl --export"
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  register: crl
+  tags:
+    - role::easy_ca
+
+- set_fact:
+    "easy_ca_ca_cert": "{{ ca_cert.stdout }}"
+    "easy_ca_cert": "{{ cert.stdout }}"
+    "easy_ca_key": "{{ key.stdout }}"
+    "easy_ca_crl": "{{ crl.stdout }}"
+  tags:
+    - role::easy_ca

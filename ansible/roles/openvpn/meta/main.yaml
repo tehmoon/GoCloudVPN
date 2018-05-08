@@ -1,0 +1,34 @@
+---
+dependencies:
+  - common
+  - { role: apt_key,
+      apt_key_add_key: "8e6da8b4e158c569",
+      when: ( ansible_distribution == 'Ubuntu' )
+    }
+  - { role: apt_repository,
+      apt_repository_add_repository: "deb http://build.openvpn.net/debian/openvpn/release/2.4 xenial main",
+      when: ( ansible_distribution == 'Ubuntu' )
+    }
+  - auth_oath
+  - { role: iptables,
+      add_custom_sources: [{
+        chain: "INPUT",
+        protocol: "tcp",
+        dport: "1194",
+        state: "NEW,ESTABLISHED",
+        jump: "ACCEPT",
+        sources: ["0.0.0.0/0"]
+      }, {
+        chain: "INPUT",
+        protocol: "udp",
+        dport: "1194",
+        state: "NEW,ESTABLISHED",
+        jump: "ACCEPT",
+        sources: ["0.0.0.0/0"]
+      }],
+      add_custom_nat_sources: [{
+        chain: "POSTROUTING",
+        jump: "MASQUERADE",
+        sources: ["0.0.0.0/0"]
+      }]
+    }

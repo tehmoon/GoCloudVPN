@@ -1,0 +1,21 @@
+---
+- fail: >
+    msg="Role: apt_key is not yet available on distribution: {{ ansible_distribution }}"
+  when: ( ansible_distribution != 'Ubuntu' )
+
+- name: "Add Key"
+  apt_key: >
+    id={{ apt_key_add_key }}
+    keyserver={{ apt_key_keyserver }}
+    state=present
+  when: ( apt_key_add_key is defined )
+  become: true
+
+- name: "Remove Key"
+  apt_key: >
+    id={{ apt_key_remove_key }}
+    state=absent
+  when: ( apt_key_remove_key is defined )
+  become: true
+
+- set_fact: role_apt_key_executed=True

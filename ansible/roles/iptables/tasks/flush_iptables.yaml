@@ -1,0 +1,21 @@
+---
+- name: "Flush iptables INPUT filters"
+  command: "iptables -t filter -F INPUT"
+  become: true
+  when: (( not role_iptables_flushed is defined ) or
+         ( not role_iptables_flushed | bool ))
+  tags:
+    - always
+
+- name: "Restore iptables without flushing"
+  command: "iptables-restore --noflush {{ iptables_rules_file }}"
+  become: true
+  when: (( not role_iptables_flushed is defined ) or
+         ( not role_iptables_flushed | bool ))
+  tags:
+    - always
+
+- set_fact: role_iptables_flushed=True
+  tags:
+    - always
+  when: ( not role_iptables_flushed is defined )

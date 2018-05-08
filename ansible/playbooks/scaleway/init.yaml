@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars_prompt:
+    - name: "SCALEWAY_ORG_TOKEN"
+      private: yes
+      prompt: "SCALEWAY_ORG_TOKEN"
+    - name: "SCALEWAY_TOKEN"
+      private: yes
+      prompt: "SCALEWAY_TOKEN"
+  tasks:
+    - name: "Find templates"
+      find:
+        paths:
+          - ../../hosts/scaleway/.templates
+      register: list_files
+
+    - name: "Copy templates"
+      copy:
+        dest: "../../hosts/scaleway/{{ item.path | basename }}"
+        content: "{{ lookup('template', item.path) }}"
+      mode: '0700'
+      with_items: "{{ list_files.files | default('[]') }}"
+      when: ( SCALEWAY_ORG_TOKEN != "" ) and
+            ( SCALEWAY_TOKEN != "" )

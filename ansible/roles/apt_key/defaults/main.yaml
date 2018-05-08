@@ -1,0 +1,4 @@
+---
+role_apt_key_executed: false
+apt_key_keyserver: keyserver.ubuntu.com
+apt_key_role_path: "{{ inventory_dir }}/../../roles/apt_key"

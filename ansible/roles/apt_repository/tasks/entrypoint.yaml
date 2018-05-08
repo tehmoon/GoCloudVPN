@@ -1,0 +1,31 @@
+---
+- fail: >
+    msg="Role: apt_repository is not yet available on distribution: {{ ansible_distribution }}"
+  when: ( ansible_distribution != 'Ubuntu' )
+
+- name: "Install packages"
+  apt:
+    package: "{{ item }}"
+  become: true
+  with_items:
+    - "apt-transport-https"
+  when: ( ansible_distribution == 'Ubuntu' ) and
+        ( not role_apt_repository_executed | bool )
+
+- name: "Ensure repository"
+  apt_repository: >
+    repo={{ apt_repository_add_repository }}
+    update_cache=yes
+    state=present
+  when: ( apt_repository_add_repository is defined )
+  become: true
+
+- name: "Delete repository"
+  apt_repository: >
+    repo={{ apt_repository_remove_repository }}
+    update_cache=yes
+    state=absent
+  when: ( apt_repository_remove_repository is defined )
+  become: true
+
+- set_fact: role_apt_repository_executed=True

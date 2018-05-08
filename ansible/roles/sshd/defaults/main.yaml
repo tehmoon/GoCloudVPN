@@ -1,0 +1,3 @@
+---
+role_sshd_executed: false
+sshd_role_path: "{{ inventory_dir }}/../../roles/sshd"

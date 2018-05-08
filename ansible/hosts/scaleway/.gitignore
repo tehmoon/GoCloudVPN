@@ -1,0 +1,12 @@
+*
+!.gitignore
+!.templates
+!.templates/**
+*.swp
+!.ssh
+!.ssh/.gitkeep
+!.ssh/config
+!.cp
+!.cp/.gitkeep
+!group_vars
+!main.yaml

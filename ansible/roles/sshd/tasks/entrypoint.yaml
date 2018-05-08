@@ -1,0 +1,12 @@
+---
+- fail: >
+    msg="Role: sshd is not yet available on distribution: {{ ansible_distribution }}"
+  when: ( ansible_distribution != 'Ubuntu' )
+
+- name: "Install packages"
+  apt:
+    package: openssh
+  become: true
+  when: ( not role_sshd_executed | bool )
+
+- set_fact: role_sshd_executed=True

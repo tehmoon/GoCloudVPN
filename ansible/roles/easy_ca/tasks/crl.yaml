@@ -1,0 +1,9 @@
+---
+# Fix failed when
+- command: "{{ inventory_dir }}/../../bin/easy-ca -p {{ inventory_dir }}/../../../pki -e password crl --update --duration \"{{ duration }}\""
+  delegate_to: localhost
+  environment:
+    password: "{{ EASY_CA_PASSWD }}"
+  failed_when: False
+  tags:
+    - role::easy_ca

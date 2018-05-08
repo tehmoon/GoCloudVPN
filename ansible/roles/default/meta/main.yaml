@@ -1,0 +1,19 @@
+---
+dependencies:
+  - { role: iptables,
+      add_custom_sources: [{
+        chain: "INPUT",
+        protocol: "tcp",
+        dport: "53",
+        state: "ESTABLISHED",
+        jump: "ACCEPT",
+        sources: "{{ dns_servers }}"
+      }, {
+        chain: "INPUT",
+        protocol: "udp",
+        dport: "53",
+        state: "ESTABLISHED",
+        jump: "ACCEPT",
+        sources: "{{ dns_servers }}"
+      }]
+    }

@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - setup:
+      delegate_facts: yes
+      delegate_to: "{{ item }}"
+      run_once: yes
+      with_items: "{{ groups['vpn'] }}"
